@@ -18,12 +18,12 @@ if (!process.browser) {
 module.exports = Promise;
 
 function Promise(resolver) {
-  if (typeof resolver !== 'function') {
+  if (typeof resolver !== 'function') {   // 确保传入的是一个函数
     throw new TypeError('resolver must be a function');
   }
   this.state = PENDING;
   this.queue = [];
-  this.outcome = void 0;
+  this.outcome = void 0;  // 设置outcome = undefined
   /* istanbul ignore else */
   if (!process.browser) {
     this.handled = UNHANDLED;
@@ -118,7 +118,7 @@ function unwrap(promise, func, value) {
 }
 
 handlers.resolve = function (self, value) {
-  var result = tryCatch(getThen, value);
+  var result = tryCatch(getThen, value);  result = { value: xxxx, status: xxxx }
   if (result.status === 'error') {
     return handlers.reject(self, result.value);
   }
@@ -160,23 +160,23 @@ handlers.reject = function (self, error) {
 
 function getThen(obj) {
   // Make sure we only access the accessor once as required by the spec
-  var then = obj && obj.then;
+  var then = obj && obj.then;  // 用于判断 value 是不是 对象 或者 函数
   if (obj && (typeof obj === 'object' || typeof obj === 'function') && typeof then === 'function') {
     return function appyThen() {
-      then.apply(obj, arguments);
+      then.apply(obj, arguments);   // arguments 为传递的多余的参数
     };
   }
 }
 
-function safelyResolveThenable(self, thenable) {
+function safelyResolveThenable(self, thenable) {  // self = this 当前的实例对象
   // Either fulfill, reject or reject with error
-  var called = false;
+  var called = false;   // 用来确保 onError、onSuccess 只执行一次
   function onError(value) {
     if (called) {
       return;
     }
     called = true;
-    handlers.reject(self, value);
+    handlers.reject(self, value);   
   }
 
   function onSuccess(value) {
@@ -188,7 +188,7 @@ function safelyResolveThenable(self, thenable) {
   }
 
   function tryToUnwrap() {
-    thenable(onSuccess, onError);
+    thenable(onSuccess, onError);  // 传递给(resolve, reject) => { /* ···· */ }
   }
 
   var result = tryCatch(tryToUnwrap);
@@ -200,7 +200,7 @@ function safelyResolveThenable(self, thenable) {
 function tryCatch(func, value) {
   var out = {};
   try {
-    out.value = func(value);
+    out.value = func(value);  // tryCatch(tryToUnwrap)  out.value = thenable(onSuccess, onError)
     out.status = 'success';
   } catch (e) {
     out.status = 'error';
